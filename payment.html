@@ -1,568 +1,184 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán Đơn hàng - CHINH Productivity</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* Brand Colors */
-            --background: #F9F8F6;
-            --primary: #E3572A;
-            --hero: #EC7147;
-            --primary-light: #FB9149;
-            --secondary: #FECF73;
-            --neutral: #213E60;
-            --white: #ffffff;
-            --text-dark: #2c3e50;
-            --text-light: #7f8c8d;
-            
-            /* Typography */
-            --font-heading: 'Montserrat', sans-serif;
-            --font-body: 'Lato', sans-serif;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: var(--font-body);
-            background: linear-gradient(135deg, var(--neutral) 0%, var(--primary) 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--text-dark);
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: var(--white);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(33, 62, 96, 0.15);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, var(--hero) 0%, var(--primary) 100%);
-            color: var(--white);
-            padding: 40px 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="3" fill="rgba(255,255,255,0.08)"/><circle cx="40" cy="70" r="2" fill="rgba(255,255,255,0.12)"/></svg>');
-            animation: float 20s infinite linear;
-        }
-        
-        @keyframes float {
-            0% { transform: translateX(-100px) translateY(-100px) rotate(0deg); }
-            100% { transform: translateX(100px) translateY(100px) rotate(360deg); }
-        }
-        
-        .brand-logo {
-            font-family: var(--font-heading);
-            font-weight: 800;
-            font-size: 24px;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .brand-logo .accent {
-            color: var(--secondary);
-        }
-        
-        .header h1 {
-            font-family: var(--font-heading);
-            font-weight: 700;
-            font-size: 28px;
-            margin-bottom: 8px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .header p {
-            font-weight: 400;
-            font-size: 16px;
-            opacity: 0.9;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .order-info {
-            padding: 35px;
-            background: var(--background);
-            border-bottom: 1px solid rgba(227, 87, 42, 0.1);
-        }
-        
-        .order-info h2 {
-            font-family: var(--font-heading);
-            font-weight: 600;
-            color: var(--neutral);
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .info-item {
-            background: var(--white);
-            padding: 16px 20px;
-            border-radius: 12px;
-            border-left: 4px solid var(--hero);
-            box-shadow: 0 2px 8px rgba(227, 87, 42, 0.08);
-        }
-        
-        .info-item strong {
-            font-family: var(--font-heading);
-            font-weight: 600;
-            color: var(--neutral);
-            display: block;
-            margin-bottom: 4px;
-        }
-        
-        .info-item span {
-            font-weight: 400;
-            color: var(--text-dark);
-            font-size: 15px;
-        }
-        
-        .payment-section {
-            display: flex;
-            padding: 35px;
-            gap: 35px;
-        }
-        
-        .qr-container {
-            flex: 1;
-            text-align: center;
-            background: var(--white);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: 0 8px 24px rgba(33, 62, 96, 0.1);
-            border: 2px solid var(--background);
-        }
-        
-        .qr-container h3 {
-            font-family: var(--font-heading);
-            font-weight: 600;
-            color: var(--neutral);
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-        
-        .qr-image {
-            max-width: 280px;
-            width: 100%;
-            height: auto;
-            border: 3px solid var(--background);
-            border-radius: 16px;
-            margin: 20px 0;
-            box-shadow: 0 4px 16px rgba(227, 87, 42, 0.15);
-        }
-        
-        .qr-container p {
-            color: var(--text-light);
-            font-size: 14px;
-            font-weight: 400;
-        }
-        
-        .instructions {
-            flex: 1;
-            background: linear-gradient(135deg, var(--secondary) 0%, #FFD89B 100%);
-            padding: 35px;
-            border-radius: 20px;
-            border: 2px solid rgba(254, 207, 115, 0.3);
-        }
-        
-        .instructions h3 {
-            font-family: var(--font-heading);
-            font-weight: 600;
-            color: var(--neutral);
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-        
-        .instructions ol {
-            margin: 20px 0;
-            line-height: 1.8;
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            font-weight: 400;
-            color: var(--text-dark);
-        }
-        
-        .instructions strong {
-            font-weight: 600;
-            color: var(--neutral);
-        }
-        
-        .transfer-content {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 16px;
-            border-radius: 12px;
-            font-family: var(--font-body);
-            font-weight: 400;
-            word-break: break-all;
-            margin: 16px 0;
-            border: 1px solid rgba(33, 62, 96, 0.1);
-            font-size: 14px;
-        }
-        
-        .warning {
-            color: var(--primary);
-            font-weight: 600;
-            margin-top: 16px;
-            font-size: 14px;
-        }
-        
-        .status {
-            text-align: center;
-            padding: 28px;
-            margin: 25px 35px;
-            border-radius: 18px;
-            font-size: 18px;
-            font-weight: 600;
-            font-family: var(--font-heading);
-        }
-        
-        .status.waiting {
-            background: linear-gradient(135deg, var(--secondary) 0%, #FFE4B5 100%);
-            color: var(--neutral);
-            border: 2px solid rgba(254, 207, 115, 0.4);
-        }
-        
-        .status.success {
-            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
-            color: var(--white);
-            border: 2px solid rgba(46, 204, 113, 0.3);
-        }
-        
-        .timer {
-            text-align: center;
-            font-size: 18px;
-            color: var(--primary);
-            margin: 20px 35px;
-            font-weight: 600;
-            font-family: var(--font-heading);
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(227, 87, 42, 0.2);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @media (max-width: 768px) {
-            .payment-section {
-                flex-direction: column;
-                padding: 25px;
-                gap: 25px;
-            }
-            
-            .container {
-                margin: 10px;
-                border-radius: 16px;
-            }
-            
-            .header {
-                padding: 30px 20px;
-            }
-            
-            .order-info, .qr-container, .instructions {
-                padding: 25px;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .brand-logo {
-                font-size: 20px;
-            }
-            
-            .header h1 {
-                font-size: 24px;
-            }
-        }
-        
-        /* Smooth transitions */
-        * {
-            transition: all 0.3s ease;
-        }
-        
-        .qr-container:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(33, 62, 96, 0.15);
-        }
-        
-        .info-item:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(227, 87, 42, 0.12);
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="brand-logo">
-                CHINH <span class="accent">productivity</span>
-            </div>
-            <h1>💳 Thanh toán Đơn hàng</h1>
-            <p>Vui lòng quét mã QR để hoàn tất thanh toán</p>
-        </div>
-        
-        <div class="order-info">
-            <h2>📋 Thông tin đơn hàng</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <strong>🆔 Mã đơn hàng</strong>
-                    <span id="orderId">Đang tải...</span>
-                </div>
-                <div class="info-item">
-                    <strong>📚 Khóa học</strong>
-                    <span id="courseName">Đang tải...</span>
-                </div>
-                <div class="info-item">
-                    <strong>💰 Số tiền</strong>
-                    <span id="amount">Đang tải...</span> VNĐ
-                </div>
-                <div class="info-item">
-                    <strong>📧 Email</strong>
-                    <span id="email">Đang tải...</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="payment-section">
-            <div class="qr-container pulse">
-                <h3>📱 Quét mã QR để thanh toán</h3>
-                <img id="qrImage" class="qr-image" src="" alt="QR Code" style="display: none;">
-                <div id="qrLoading" class="loading"></div>
-                <p>Sử dụng app ngân hàng để quét mã QR</p>
-            </div>
-            
-            <div class="instructions">
-                <h3>💡 Hướng dẫn thanh toán</h3>
-                <ol>
-                    <li>Mở ứng dụng ngân hàng trên điện thoại</li>
-                    <li>Chọn chức năng <strong>"Quét mã QR"</strong></li>
-                    <li>Quét mã QR code bên trái</li>
-                    <li>Kiểm tra thông tin và xác nhận thanh toán</li>
-                    <li>Chờ hệ thống xác nhận (tự động)</li>
-                </ol>
-                
-                <h4>📝 Nội dung chuyển khoản:</h4>
-                <div class="transfer-content" id="transferContent">
-                    Đang tải...
-                </div>
-                
-                <p class="warning">
-                    ⚠️ Vui lòng GIỮ NGUYÊN nội dung chuyển khoản
-                </p>
-            </div>
-        </div>
-        
-        <div id="paymentStatus" class="status waiting">
-            <span class="loading"></span> Chờ thanh toán...
-        </div>
-        
-        <div class="timer" id="timer">
-            ⏰ Thời gian còn lại: <span id="countdown">30:00</span>
-        </div>
-    </div>
+// Get parameters from URL
+const urlParams = new URLSearchParams(window.location.search);
+const orderId = urlParams.get('order');
+const isWaitingMode = urlParams.get('wait') === 'true';
 
-    <script>
-        // Configuration
-        const LARK_BASE_API = 'YOUR_LARK_BASE_API_ENDPOINT';
-        const CHECK_INTERVAL = 5000;
-        const TIMEOUT_MINUTES = 30;
+// Main load function
+window.addEventListener('DOMContentLoaded', function() {
+    if (isWaitingMode && orderId) {
+        // Customer vừa submit form, đang wait processing
+        showWaitingScreen();
+        waitForOrderProcessing(orderId);
+    } else if (orderId) {
+        // Direct access với order ID
+        loadOrderData(orderId);
+    } else {
+        showError('Không tìm thấy thông tin đơn hàng!');
+    }
+});
+
+// Show waiting screen
+function showWaitingScreen() {
+    document.body.innerHTML = `
+        <div class="waiting-container">
+            <div class="spinner"></div>
+            <h2>🔄 Đang xử lý đơn hàng...</h2>
+            <p>Đơn hàng: <strong>${orderId}</strong></p>
+            <p>Vui lòng đợi trong giây lát</p>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <small>Thời gian xử lý: 5-10 giây</small>
+        </div>
+    `;
+    
+    // Animate progress bar
+    animateProgress();
+}
+
+// Wait for order processing completion
+async function waitForOrderProcessing(orderId) {
+    let attempts = 0;
+    const maxAttempts = 30; // 60 seconds max
+    
+    const checkInterval = setInterval(async () => {
+        attempts++;
+        updateProgress(attempts, maxAttempts);
         
-        let orderId = '';
-        let orderData = {};
-        let paymentCheckInterval;
-        let countdownInterval;
-        let timeLeft = TIMEOUT_MINUTES * 60;
-
-        window.onload = async function() {
-            try {
-                await loadOrderInfo();
-                await loadQRCode();
-                startPaymentCheck();
-                startCountdown();
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showError('Có lỗi khi tải thông tin đơn hàng!');
-            }
-        };
-
-        function getOrderId() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('order');
-        }
-
-        async function loadOrderInfo() {
-            orderId = getOrderId();
+        try {
+            // Check if order is processed in n8n/GitHub
+            const orderReady = await checkOrderStatus(orderId);
             
-            if (!orderId) {
-                showError('Không tìm thấy thông tin đơn hàng!');
+            if (orderReady) {
+                clearInterval(checkInterval);
+                // Remove wait param and reload with clean URL
+                window.location.href = `?order=${orderId}`;
                 return;
             }
             
-            orderData = {
-                orderId: orderId,
-                courseName: 'JavaScript Cơ bản',
-                amount: 500000,
-                email: 'test@example.com',
-                phone: '0901234567',
-                transferContent: orderId + '0901234567Dangkydichvukhoahoc'
-            };
-            
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('orderId').textContent = orderData.orderId;
-            document.getElementById('courseName').textContent = orderData.courseName;
-            document.getElementById('amount').textContent = new Intl.NumberFormat('vi-VN').format(orderData.amount);
-            document.getElementById('email').textContent = orderData.email;
-            document.getElementById('transferContent').textContent = orderData.transferContent;
-        }
-
-        async function loadQRCode() {
-            try {
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(orderData.transferContent)}`;
-                
-                const qrImage = document.getElementById('qrImage');
-                const qrLoading = document.getElementById('qrLoading');
-                
-                qrImage.onload = function() {
-                    qrLoading.style.display = 'none';
-                    qrImage.style.display = 'block';
-                };
-                
-                qrImage.src = qrUrl;
-                
-            } catch (error) {
-                console.error('QR loading error:', error);
-                showError('Không thể tải mã QR!');
+            if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                showTimeoutError();
             }
-        }
-
-        function startPaymentCheck() {
-            paymentCheckInterval = setInterval(async () => {
-                const isPaid = await checkPaymentStatus();
-                if (isPaid) {
-                    showPaymentSuccess();
-                    clearInterval(paymentCheckInterval);
-                    clearInterval(countdownInterval);
-                }
-            }, CHECK_INTERVAL);
-        }
-
-        async function checkPaymentStatus() {
-            try {
-                if (timeLeft < (TIMEOUT_MINUTES * 60 - 30)) {
-                    return Math.random() > 0.8;
-                }
-                return false;
-            } catch (error) {
-                console.error('Payment check error:', error);
-                return false;
-            }
-        }
-
-        function showPaymentSuccess() {
-            const statusDiv = document.getElementById('paymentStatus');
-            statusDiv.className = 'status success';
-            statusDiv.innerHTML = '✅ Thanh toán thành công!<br><small>Đang chuyển hướng...</small>';
             
-            document.getElementById('timer').style.display = 'none';
+        } catch (error) {
+            console.error('Check status error:', error);
+        }
+        
+    }, 2000); // Check every 2 seconds
+}
+
+// Check if order is ready
+async function checkOrderStatus(orderId) {
+    try {
+        // Method 1: Check GitHub JSON
+        const response = await fetch('/data/orders.json?' + Date.now());
+        const database = await response.json();
+        
+        if (database.orders && database.orders[orderId]) {
+            return true;
+        }
+        
+        // Method 2: Check n8n endpoint (alternative)
+        // const n8nResponse = await fetch(`https://your-n8n.app/webhook/check-order/${orderId}`);
+        // return n8nResponse.ok;
+        
+        return false;
+        
+    } catch (error) {
+        console.error('Status check failed:', error);
+        return false;
+    }
+}
+
+// Load actual order data (when processing done)
+async function loadOrderData(orderId) {
+    try {
+        const response = await fetch('/data/orders.json?' + Date.now());
+        const database = await response.json();
+        
+        if (!database.orders || !database.orders[orderId]) {
+            throw new Error('Order not found');
+        }
+        
+        const orderData = database.orders[orderId];
+        displayOrderInfo(orderData);
+        loadQRCode(orderData.qrImageUrl);
+        
+    } catch (error) {
+        console.error('Load order error:', error);
+        showError('Không thể tải thông tin đơn hàng!');
+    }
+}
+
+// Display order information
+function displayOrderInfo(orderData) {
+    document.body.innerHTML = `
+        <div class="payment-container">
+            <div class="order-info">
+                <h1>💳 Thanh toán đơn hàng</h1>
+                <div class="order-details">
+                    <p><strong>Mã đơn:</strong> ${orderData.orderId}</p>
+                    <p><strong>Khóa học:</strong> ${orderData.courseName}</p>
+                    <p><strong>Số tiền:</strong> ${orderData.amount.toLocaleString()} VND</p>
+                    <p><strong>Email:</strong> ${orderData.email}</p>
+                </div>
+            </div>
             
-            setTimeout(() => {
-                alert('🎉 Cảm ơn bạn đã đăng ký!\n📧 Email xác nhận sẽ được gửi trong 5 phút.\n\n- CHINH Productivity Team');
-            }, 3000);
-        }
-
-        function startCountdown() {
-            countdownInterval = setInterval(() => {
-                timeLeft--;
+            <div class="qr-section">
+                <h3>Quét mã QR để thanh toán:</h3>
+                <div id="qrLoading" class="qr-loading">
+                    <div class="spinner"></div>
+                    <p>Đang tải mã QR...</p>
+                </div>
+                <img id="qrImage" class="qr-image" style="display: none;" alt="QR Code">
                 
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                
-                document.getElementById('countdown').textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    clearInterval(paymentCheckInterval);
-                    showTimeout();
-                }
-            }, 1000);
-        }
+                <div class="transfer-info">
+                    <p><strong>Nội dung chuyển khoản:</strong></p>
+                    <div class="transfer-content">${orderData.transferContent}</div>
+                    <button onclick="copyTransferContent()" class="copy-btn">📋 Copy</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
-        function showTimeout() {
-            const statusDiv = document.getElementById('paymentStatus');
-            statusDiv.className = 'status waiting';
-            statusDiv.style.background = 'linear-gradient(135deg, #E74C3C 0%, #C0392B 100%)';
-            statusDiv.style.color = '#ffffff';
-            statusDiv.innerHTML = '⏰ Hết thời gian thanh toán!<br><small>Vui lòng đăng ký lại</small>';
-            
-            setTimeout(() => {
-                alert('Hết thời gian thanh toán!\nVui lòng đăng ký lại.\n\n- CHINH Productivity Team');
-                history.back();
-            }, 3000);
-        }
+// Utility functions
+function updateProgress(current, max) {
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) {
+        const percentage = (current / max) * 100;
+        progressBar.style.width = percentage + '%';
+    }
+}
 
-        function showError(message) {
-            const statusDiv = document.getElementById('paymentStatus');
-            statusDiv.className = 'status waiting';
-            statusDiv.style.background = 'linear-gradient(135deg, #E74C3C 0%, #C0392B 100%)';
-            statusDiv.style.color = '#ffffff';
-            statusDiv.innerHTML = '❌ ' + message;
+function animateProgress() {
+    let width = 0;
+    const interval = setInterval(() => {
+        width += 2;
+        const progressBar = document.getElementById('progressBar');
+        if (progressBar && width <= 90) {
+            progressBar.style.width = width + '%';
+        } else {
+            clearInterval(interval);
         }
-    </script>
-</body>
-</html>
+    }, 200);
+}
+
+function showTimeoutError() {
+    document.body.innerHTML = `
+        <div class="error-container">
+            <h2>⏰ Timeout</h2>
+            <p>Quá trình xử lý mất nhiều thời gian hơn dự kiến.</p>
+            <button onclick="location.reload()" class="retry-btn">🔄 Thử lại</button>
+            <p><small>Hoặc liên hệ support nếu vấn đề vẫn tiếp diễn</small></p>
+        </div>
+    `;
+}
+
+function copyTransferContent() {
+    const content = document.querySelector('.transfer-content').textContent;
+    navigator.clipboard.writeText(content).then(() => {
+        alert('Đã copy nội dung chuyển khoản!');
+    });
+}
