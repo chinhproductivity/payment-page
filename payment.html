@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán Đơn hàng</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .order-info {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .payment-section {
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+        }
+        
+        .qr-container {
+            flex: 1;
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .qr-image {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            flex: 1;
+            background: #fff3cd;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .timer {
+            text-align: center;
+            font-size: 18px;
+            color: #dc3545;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .transfer-content {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 15px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .payment-section {
+                flex-direction: column;
+            }
+            .container {
+                margin: 10px;
+            }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💳 Thanh toán Đơn hàng</h1>
+            <p>Vui lòng quét mã QR để hoàn tất thanh toán</p>
+        </div>
+        
+        <div class="order-info">
+            <h2>📋 Thông tin đơn hàng</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+                <p><strong>🆔 Mã đơn hàng:</strong> <span id="orderId">Đang tải...</span></p>
+                <p><strong>📚 Khóa học:</strong> <span id="courseName">Đang tải...</span></p>
+                <p><strong>💰 Số tiền:</strong> <span id="amount">Đang tải...</span> VNĐ</p>
+                <p><strong>📧 Email:</strong> <span id="email">Đang tải...</span></p>
+            </div>
+        </div>
+        
+        <div class="payment-section">
+            <div class="qr-container">
+                <h3>📱 Quét mã QR để thanh toán</h3>
+                <img id="qrImage" class="qr-image" src="" alt="QR Code" style="display: none;">
+                <div id="qrLoading" class="loading"></div>
+                <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                    Sử dụng app ngân hàng để quét mã QR
+                </p>
+            </div>
+            
+            <div class="instructions">
+                <h3>💡 Hướng dẫn thanh toán</h3>
+                <ol style="margin: 20px 0; line-height: 1.8;">
+                    <li>Mở ứng dụng ngân hàng trên điện thoại</li>
+                    <li>Chọn chức năng <strong>"Quét mã QR"</strong></li>
+                    <li>Quét mã QR code bên trái</li>
+                    <li>Kiểm tra thông tin và xác nhận thanh toán</li>
+                    <li>Chờ hệ thống xác nhận (tự động)</li>
+                </ol>
+                
+                <h4>📝 Nội dung chuyển khoản:</h4>
+                <div class="transfer-content" id="transferContent">
+                    Đang tải...
+                </div>
+                
+                <p style="color: #e74c3c; font-weight: bold; margin-top: 15px;">
+                    ⚠️ Vui lòng GIỮ NGUYÊN nội dung chuyển khoản
+                </p>
+            </div>
+        </div>
+        
+        <div id="paymentStatus" class="status waiting">
+            <span class="loading"></span> Chờ thanh toán...
+        </div>
+        
+        <div class="timer" id="timer">
+            ⏰ Thời gian còn lại: <span id="countdown">30:00</span>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const LARK_BASE_API = 'YOUR_LARK_BASE_API_ENDPOINT'; // Cập nhật sau
+        const CHECK_INTERVAL = 5000; // Check mỗi 5 giây
+        const TIMEOUT_MINUTES = 30;
+        
+        let orderId = '';
+        let orderData = {};
+        let paymentCheckInterval;
+        let countdownInterval;
+        let timeLeft = TIMEOUT_MINUTES * 60;
+
+        // Initialize page
+        window.onload = async function() {
+            try {
+                await loadOrderInfo();
+                await loadQRCode();
+                startPaymentCheck();
+                startCountdown();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError('Có lỗi khi tải thông tin đơn hàng!');
+            }
+        };
+
+        // Get order ID from URL
+        function getOrderId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('order');
+        }
+
+        // Load order information
+        async function loadOrderInfo() {
+            orderId = getOrderId();
+            
+            if (!orderId) {
+                showError('Không tìm thấy thông tin đơn hàng!');
+                return;
+            }
+            
+            // Mock data - sẽ thay bằng API call thật đến Lark Base
+            orderData = {
+                orderId: orderId,
+                courseName: 'JavaScript Cơ bản',
+                amount: 500000,
+                email: 'test@example.com',
+                phone: '0901234567',
+                transferContent: orderId + '0901234567Dangkydichvukhoahoc'
+            };
+            
+            updateUI();
+        }
+
+        // Update UI with order data
+        function updateUI() {
+            document.getElementById('orderId').textContent = orderData.orderId;
+            document.getElementById('courseName').textContent = orderData.courseName;
+            document.getElementById('amount').textContent = new Intl.NumberFormat('vi-VN').format(orderData.amount);
+            document.getElementById('email').textContent = orderData.email;
+            document.getElementById('transferContent').textContent = orderData.transferContent;
+        }
+
+        // Load QR Code
+        async function loadQRCode() {
+            try {
+                // Construct QR URL (same as Lark automation)
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(orderData.transferContent)}`;
+                
+                const qrImage = document.getElementById('qrImage');
+                const qrLoading = document.getElementById('qrLoading');
+                
+                // Load QR image
+                qrImage.onload = function() {
+                    qrLoading.style.display = 'none';
+                    qrImage.style.display = 'block';
+                };
+                
+                qrImage.src = qrUrl;
+                
+            } catch (error) {
+                console.error('QR loading error:', error);
+                showError('Không thể tải mã QR!');
+            }
+        }
+
+        // Start payment status check
+        function startPaymentCheck() {
+            paymentCheckInterval = setInterval(async () => {
+                const isPaid = await checkPaymentStatus();
+                if (isPaid) {
+                    showPaymentSuccess();
+                    clearInterval(paymentCheckInterval);
+                    clearInterval(countdownInterval);
+                }
+            }, CHECK_INTERVAL);
+        }
+
+        // Check payment status
+        async function checkPaymentStatus() {
+            try {
+                // Mock check - sẽ thay bằng API call thật
+                // Kiểm tra Bảng 1 (Số dư) có giao dịch với nội dung khớp không
+                
+                // Simulation: Random success after 30 seconds for demo
+                if (timeLeft < (TIMEOUT_MINUTES * 60 - 30)) {
+                    return Math.random() > 0.8; // 20% chance mỗi lần check
+                }
+                
+                return false;
+                
+            } catch (error) {
+                console.error('Payment check error:', error);
+                return false;
+            }
+        }
+
+        // Show payment success
+        function showPaymentSuccess() {
+            const statusDiv = document.getElementById('paymentStatus');
+            statusDiv.className = 'status success';
+            statusDiv.innerHTML = '✅ Thanh toán thành công!<br><small>Đang chuyển hướng...</small>';
+            
+            document.getElementById('timer').style.display = 'none';
+            
+            // Redirect to success page
+            setTimeout(() => {
+                alert('🎉 Thanh toán thành công!\n📧 Email xác nhận sẽ được gửi trong 5 phút.\n🏠 Quay về trang chủ...');
+                // window.location.href = '/success.html?order=' + orderId;
+            }, 3000);
+        }
+
+        // Start countdown timer
+        function startCountdown() {
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                document.getElementById('countdown').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    clearInterval(paymentCheckInterval);
+                    showTimeout();
+                }
+            }, 1000);
+        }
+
+        // Show timeout
+        function showTimeout() {
+            const statusDiv = document.getElementById('paymentStatus');
+            statusDiv.className = 'status waiting';
+            statusDiv.style.background = '#f8d7da';
+            statusDiv.style.color = '#721c24';
+            statusDiv.innerHTML = '⏰ Hết thời gian thanh toán!<br><small>Vui lòng đăng ký lại</small>';
+            
+            setTimeout(() => {
+                alert('Hết thời gian thanh toán!\nVui lòng đăng ký lại.');
+                history.back();
+            }, 3000);
+        }
+
+        // Show error
+        function showError(message) {
+            const statusDiv = document.getElementById('paymentStatus');
+            statusDiv.className = 'status waiting';
+            statusDiv.style.background = '#f8d7da';
+            statusDiv.style.color = '#721c24';
+            statusDiv.innerHTML = '❌ ' + message;
+        }
+    </script>
+</body>
+</html>
