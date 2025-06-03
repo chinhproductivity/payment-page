@@ -46,7 +46,7 @@ async function waitForOrderProcessing(orderId) {
         updateProgress(attempts, maxAttempts);
         
         try {
-            // Check if order is processed in n8n/GitHub
+            // Check if order is processed in n8n
             const orderReady = await checkOrderStatus(orderId);
             
             if (orderReady) {
@@ -68,22 +68,26 @@ async function waitForOrderProcessing(orderId) {
     }, 2000); // Check every 2 seconds
 }
 
-// Check if order is ready
-async function checkOrderStatus(orderId) {
+// Check if order is ready - UPDATED TO USE N8N
+async function checkOrderStatus(recordId) {
     try {
-        // Method 1: Check GitHub JSON
-        const response = await fetch('/data/orders.json?' + Date.now());
-        const database = await response.json();
+        console.log('Checking order status for recordId:', recordId);
         
-        if (database.orders && database.orders[orderId]) {
-            return true;
+        const response = await fetch(`https://n8n.cuonghoa.ai/webhook/get-order?recordId=${recordId}`);
+        
+        if (!response.ok) {
+            console.log('Response not OK:', response.status);
+            return false;
         }
         
-        // Method 2: Check n8n endpoint (alternative)
-        // const n8nResponse = await fetch(`https://your-n8n.app/webhook/check-order/${orderId}`);
-        // return n8nResponse.ok;
+        const data = await response.json();
+        console.log('Status check response:', data);
         
-        return false;
+        // Check if order exists and has valid data
+        const orderExists = data.orders && data.orders[recordId] && !data.error;
+        console.log('Order exists:', orderExists);
+        
+        return orderExists;
         
     } catch (error) {
         console.error('Status check failed:', error);
@@ -91,23 +95,40 @@ async function checkOrderStatus(orderId) {
     }
 }
 
-// Load actual order data (when processing done)
-async function loadOrderData(orderId) {
+// Load actual order data - UPDATED TO USE N8N
+async function loadOrderData(recordId) {
     try {
-        const response = await fetch('/data/orders.json?' + Date.now());
-        const database = await response.json();
+        console.log('Loading order data for recordId:', recordId);
         
-        if (!database.orders || !database.orders[orderId]) {
-            throw new Error('Order not found');
+        const response = await fetch(`https://n8n.cuonghoa.ai/webhook/get-order?recordId=${recordId}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const orderData = database.orders[orderId];
+        const database = await response.json();
+        console.log('Received data:', database);
+        
+        // Check for API errors
+        if (database.error) {
+            throw new Error(database.message || 'API returned error');
+        }
+        
+        // Check if order exists
+        if (!database.orders || !database.orders[recordId]) {
+            throw new Error('Order not found in response');
+        }
+        
+        const orderData = database.orders[recordId];
+        console.log('Order data:', orderData);
+        
+        // Display order information
         displayOrderInfo(orderData);
         loadQRCode(orderData.qrImageUrl);
         
     } catch (error) {
         console.error('Load order error:', error);
-        showError('Không thể tải thông tin đơn hàng!');
+        showError(`Không thể tải thông tin đơn hàng: ${error.message}`);
     }
 }
 
@@ -118,9 +139,9 @@ function displayOrderInfo(orderData) {
             <div class="order-info">
                 <h1>💳 Thanh toán đơn hàng</h1>
                 <div class="order-details">
-                    <p><strong>Mã đơn:</strong> ${orderData.orderId}</p>
+                    <p><strong>Mã đơn:</strong> ${orderData.orderId || orderData.recordId}</p>
                     <p><strong>Khóa học:</strong> ${orderData.courseName}</p>
-                    <p><strong>Số tiền:</strong> ${orderData.amount.toLocaleString()} VND</p>
+                    <p><strong>Số tiền:</strong> ${parseInt(orderData.amount || 0).toLocaleString()} VND</p>
                     <p><strong>Email:</strong> ${orderData.email}</p>
                 </div>
             </div>
@@ -139,6 +160,45 @@ function displayOrderInfo(orderData) {
                     <button onclick="copyTransferContent()" class="copy-btn">📋 Copy</button>
                 </div>
             </div>
+        </div>
+    `;
+}
+
+// Load QR Code
+function loadQRCode(qrImageUrl) {
+    try {
+        const qrImage = document.getElementById('qrImage');
+        const qrLoading = document.getElementById('qrLoading');
+        
+        if (!qrImageUrl) {
+            qrLoading.innerHTML = '<p>❌ Không có mã QR</p>';
+            return;
+        }
+        
+        qrImage.onload = function() {
+            qrLoading.style.display = 'none';
+            qrImage.style.display = 'block';
+        };
+        
+        qrImage.onerror = function() {
+            qrLoading.innerHTML = '<p>❌ Không thể tải mã QR</p>';
+        };
+        
+        qrImage.src = qrImageUrl;
+        
+    } catch (error) {
+        console.error('QR loading error:', error);
+        document.getElementById('qrLoading').innerHTML = '<p>❌ Lỗi tải mã QR</p>';
+    }
+}
+
+// Show error message
+function showError(message) {
+    document.body.innerHTML = `
+        <div class="error-container">
+            <h2>❌ Lỗi</h2>
+            <p>${message}</p>
+            <button onclick="location.reload()" class="retry-btn">🔄 Thử lại</button>
         </div>
     `;
 }
